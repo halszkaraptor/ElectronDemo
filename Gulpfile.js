@@ -7,3 +7,8 @@ var gulp        = require('gulp'),
 gulp.task('run', function () {
     childProcess.spawn(electron, ['./app'], { stdio: 'inherit' });
 });
+
+// create the gulp task for debug
+gulp.task('flyswatter', function () {
+    childProcess.spawn(electron, ['--debug=5858','./app'], { stdio: 'inherit' });
+});
