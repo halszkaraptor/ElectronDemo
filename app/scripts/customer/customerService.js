@@ -1,13 +1,24 @@
 (function () {
     'use strict';
-    var mysql = require('mysql');
+    const Dexie = require('dexie');
 
-    // Creates MySql database connection
-    var connection = mysql.createConnection({
-        host: "dev.laravel",
-        user: "homestead",
-        password: "secret",
-        database: "demo"
+    Dexie.debug = true;
+
+    let db = new Dexie("db");
+    db.version(1).stores({ runs: "++id,name", customers: "++id,email,name,address,city,country,phone,remarks" });
+
+    db.transaction('rw', [db.runs, db.customers], function*() {
+        if ((yield db.runs.limit(1).count()) === 0) {
+            db.customers.bulkPut([
+                {id: 4, email: "email@email.com", name: "Person Name", address: "180 Address Road", city: "City", country: "country", phone: "phone", remarks: "remraks"},
+                {id: 5, email: "email@email.com1", name: "Person Name1", address: "180 Address Road1", city: "City1", country: "country1", phone: "phone1", remarks: "remraks1"},
+                {id: 6, email: "tom@org.com", name: "Tom Tester", address: "42 Testing Drive", city: "Testville", country: "Demoaria", phone: "123456789", remarks: "Really testworthy"}
+            ]);
+
+            db.runs.put({"id": 1, "name": "init"});
+        }
+    }).catch(e => {
+        console.error (e.stack);
     });
 
     angular.module('app')
@@ -24,65 +35,27 @@
         };
 
         function getCustomers() {
-            console.log("Getting customers...");
-            var deferred = $q.defer();
-            var query = "SELECT * FROM customers";
-            connection.query(query, function (err, rows) {
-                if (err) deferred.reject(err);
-                deferred.resolve(rows);
-            });
-            return deferred.promise;
+            return db.customers.toArray();
         }
 
         function getCustomerById(id) {
-            var deferred = $q.defer();
-            var query = "SELECT * FROM customers WHERE customer_id = ?";
-            connection.query(query, [id], function (err, rows) {
-                if (err) deferred.reject(err);
-                deferred.resolve(rows);
-            });
-            return deferred.promise;
+            return db.customers.where("id").equals(id).toArray();
         }
 
         function getCustomerByName(name) {
-            var deferred = $q.defer();
-            var query = "SELECT * FROM customers WHERE name LIKE  '" + name + "%'";
-            connection.query(query, [name], function (err, rows) {
-                if (err) deferred.reject(err);
-
-                deferred.resolve(rows);
-            });
-            return deferred.promise;
+            return db.custoemrs.toArray();
         }
 
         function createCustomer(customer) {
-            var deferred = $q.defer();
-            var query = "INSERT INTO customers SET ?";
-            connection.query(query, customer, function (err, res) {
-                if (err) deferred.reject(err);
-                deferred.resolve(res.insertId);
-            });
-            return deferred.promise;
+            return db.customers.put(customer);
         }
 
         function deleteCustomer(id) {
-            var deferred = $q.defer();
-            var query = "DELETE FROM customers WHERE customer_id = ?";
-            connection.query(query, [id], function (err, res) {
-                if (err) deferred.reject(err);
-                deferred.resolve(res.affectedRows);
-            });
-            return deferred.promise;
+            return db.customers.delete(id);
         }
 
         function updateCustomer(customer) {
-            var deferred = $q.defer();
-            var query = "UPDATE customers SET name = ? WHERE customer_id = ?";
-            connection.query(query, [customer.name, customer.customer_id], function (err, res) {
-                if (err) deferred.reject(err);
-                deferred.resolve(res);
-            });
-            return deferred.promise;
+            return createCustomer(customer);
         }
     }
 })();

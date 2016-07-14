@@ -10,7 +10,8 @@ var distDir    = projectDir.cwd('./dist');
 
 // get the dependencies
 var gulp        = require('gulp'),
-    childProcess  = require('child_process');
+    childProcess  = require('child_process'),
+    electron      = require('electron-prebuilt');
 var exec = require('child_process').exec;
 
 // create the gulp task
@@ -20,7 +21,7 @@ gulp.task('run', function () {
 
 // create the gulp task for debug
 gulp.task('flyswatter', function () {
-    childProcess.spawn(electron, ['--debug=5858','./app'], { stdio: 'inherit' });
+    childProcess.spawn(electron, ['--debug=7821','./app'], { stdio: 'inherit' });
 });
 
 gulp.task('clean', function (callback) {

@@ -1,9 +1,9 @@
 (function () {
     'use strict';
     angular.module('app')
-        .controller('customerController', ['customerService', '$q', '$mdDialog', CustomerController]);
+        .controller('customerController', ['customerService', '$q', '$mdDialog', '$scope', CustomerController]);
 
-    function CustomerController(customerService, $q, $mdDialog) {
+    function CustomerController(customerService, $q, $mdDialog, $scope) {
         var self = this;
 
         self.selected = null;
@@ -38,15 +38,15 @@
 
 
             $mdDialog.show(confirm).then(function () {
-                customerService.destroy(self.selected.customer_id).then(function (affectedRows) {
+                customerService.destroy(self.selected.id).then(function (affectedRows) {
                     self.customers.splice(self.selectedIndex, 1);
                 });
             }, function () { });
         }
 
         function saveCustomer($event) {
-            if (self.selected != null && self.selected.customer_id != null) {
-                customerService.update(self.selected).then(function (affectedRows) {
+            if (self.selected != null && self.selected.id != null) {
+                customerService.update(angular.copy(self.selected)).then(function (affectedRows) {
                     $mdDialog.show(
                         $mdDialog
                             .alert()
@@ -61,6 +61,8 @@
             else {
                 //self.selected.customer_id = new Date().getSeconds();
                 customerService.create(self.selected).then(function (affectedRows) {
+                    self.customers.push(self.selected);
+                    self.selectedIndex(self.customers.length-1);
                     $mdDialog.show(
                         $mdDialog
                             .alert()
@@ -80,13 +82,17 @@
         }
 
         function getAllCustomers() {
+            self.customers = [1, 8];
+
             customerService.getCustomers().then(function (customers) {
                 self.customers = [].concat(customers);
                 self.selected = customers[0];
+                $scope.$apply();
             });
         }
 
         function filterCustomer() {
+            return;
             if (self.filterText == null || self.filterText == "") {
                 getAllCustomers();
             }
