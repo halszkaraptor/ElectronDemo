@@ -9,12 +9,11 @@
         self.selected = null;
         self.customers = [];
         self.selectedIndex = 0;
-        self.filterText = null;
+        self.filterText = "";
         self.selectCustomer = selectCustomer;
         self.deleteCustomer = deleteCustomer;
         self.saveCustomer = saveCustomer;
         self.createCustomer = createCustomer;
-        self.filter = filterCustomer;
 
         // Load initial data
         getAllCustomers();
@@ -89,19 +88,6 @@
                 self.selected = customers[0];
                 $scope.$apply();
             });
-        }
-
-        function filterCustomer() {
-            return;
-            if (self.filterText == null || self.filterText == "") {
-                getAllCustomers();
-            }
-            else {
-                customerService.getByName(self.filterText).then(function (customers) {
-                    self.customers = [].concat(customers);
-                    self.selected = customers[0];
-                });
-            }
         }
     }
 
